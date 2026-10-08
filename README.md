@@ -16,7 +16,7 @@ Este trabajo corresponde a la pre-entrega del Módulo 3 del curso de Data Analyt
 
 | Archivo | Descripción |
 |---|---|
-| `ventas_tech_db.sql` | Script completo: creación de la base, tablas (DDL), carga de datos (DML) y validación |
+| `modulo-3/ventas_tech_db.sql` | Script completo: creación de la base, tablas (DDL), carga de datos (DML) y validación |
 | `README.md` | Este documento |
 
 ## Modelo de datos
@@ -67,7 +67,7 @@ Antes de la sección 1, el script crea la base `Ventas_Tech_DB` si todavía no e
 ## Cómo ejecutar el script en SSMS
 
 1. Abrí **SQL Server Management Studio** y conectate a tu instancia de SQL Server (local o remota).
-2. Descargá `ventas_tech_db.sql` de este repositorio.
+2. Descargá `modulo-3/ventas_tech_db.sql` de este repositorio.
 3. En SSMS, andá a **Archivo → Abrir → Archivo...** y seleccioná `ventas_tech_db.sql`.
 4. Verificá que la conexión activa sea tu servidor. No hace falta elegir una base: el script crea `Ventas_Tech_DB` y la selecciona con `USE`.
 5. Presioná **Ejecutar** (o la tecla **F5**).

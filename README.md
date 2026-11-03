@@ -1,80 +1,53 @@
-# Ventas_Tech_DB — Módulo 3: Introducción a SQL y Sublenguajes
+# RetailPro — Proyecto de Data Analytics
 
-## Descripción del proyecto
+Proyecto integrador del curso de Data Analytics de Coderhouse. RetailPro es una empresa
+ficticia que vende tecnología (computación, accesorios, audio y almacenamiento). A lo largo
+del curso armé la base de datos, la consulté con SQL y después llevé los datos a Power BI.
 
-Base de datos relacional para una empresa que vende productos de tecnología (computación, accesorios, audio y almacenamiento). Registra qué clientes compran, qué productos se venden, a qué categoría pertenece cada producto y el detalle de cada venta.
+Autor: Matías Agustín D'aloia.
 
-Este trabajo corresponde a la pre-entrega del Módulo 3 del curso de Data Analytics (Coderhouse). El script implementa el modelo relacional diseñado en el Módulo 2, normalizado hasta la Tercera Forma Normal (3FN), y carga datos iniciales de ejemplo.
+## Herramientas
 
-## Motor de base de datos
-
-- **Microsoft SQL Server** (dialecto T-SQL)
-- **SQL Server Management Studio (SSMS)** para ejecutar el script
-- Versión mínima recomendada: SQL Server 2016, porque el script usa `DROP TABLE IF EXISTS`
+- **Microsoft SQL Server** (T-SQL), ejecutado desde **SQL Server Management Studio (SSMS)**.
+  Hace falta SQL Server 2016 o superior, porque los scripts usan `DROP TABLE IF EXISTS`.
+- **Power BI Desktop**, con Power Query (lenguaje M) para la limpieza y DAX para las medidas.
 
 ## Contenido del repositorio
 
-| Archivo | Descripción |
+| Carpeta / archivo | Qué es |
 |---|---|
-| `modulo-3/ventas_tech_db.sql` | Script completo: creación de la base, tablas (DDL), carga de datos (DML) y validación |
-| `README.md` | Este documento |
+| `modulo-3/ventas_tech_db.sql` | Crea la base `Ventas_Tech_DB`, las 4 tablas con sus claves y carga los datos iniciales (M3) |
+| `modulo-3/m4_consultas_negocio.sql` | Consultas de negocio con `GROUP BY`, `HAVING` y `CASE` (M4) |
+| `modulo-3/m5_consultas_joins.sql` | Consultas con `INNER JOIN`, `LEFT JOIN` y `UNION ALL` (M5) |
+| `modulo-8/` | Modelo de Power BI: relaciones, tabla calendario y medidas DAX (M8) |
 
 ## Modelo de datos
 
-La base `Ventas_Tech_DB` tiene cuatro tablas:
+`Ventas_Tech_DB` está normalizada en tercera forma normal:
 
-| Tabla | Clave primaria | Descripción | Columnas principales |
-|---|---|---|---|
-| `categorias` | `id_categoria` | Clasificación de los productos | `nombre_categoria`, `descripcion` |
-| `clientes` | `id_cliente` | Personas que realizan compras | `nombre`, `email` (único), `ciudad`, `fecha_registro` |
-| `productos` | `id_producto` | Catálogo de productos | `nombre_producto`, `id_categoria` (FK), `precio`, `stock` (default 0), `activo` (default 1) |
-| `ventas` | `id_venta` | Registro de cada venta | `id_cliente` (FK), `id_producto` (FK), `cantidad`, `precio_unitario`, `fecha_venta` |
+- **categorias** (`id_categoria`) → tiene muchos **productos**
+- **clientes** (`id_cliente`) → hace muchas **ventas**
+- **productos** (`id_producto`, con `id_categoria` como FK) → aparece en muchas **ventas**
+- **ventas** (`id_venta`, con `id_cliente` e `id_producto` como FK) guarda cantidad,
+  precio unitario y fecha. El precio se guarda en la venta para conservar el que se cobró,
+  aunque después cambie el de lista.
 
-### Relaciones
+## Cómo ejecutar los scripts en SSMS
 
-- Una **categoría** tiene muchos **productos** (`productos.id_categoria` → `categorias.id_categoria`).
-- Un **cliente** realiza muchas **ventas** (`ventas.id_cliente` → `clientes.id_cliente`).
-- Un **producto** aparece en muchas **ventas** (`ventas.id_producto` → `productos.id_producto`).
+1. Descargá los archivos de la carpeta `modulo-3` (o el repositorio entero con *Code → Download ZIP*).
+2. Abrí SSMS y conectate a tu servidor. No hace falta elegir una base.
+3. Abrí y ejecutá **primero `ventas_tech_db.sql`** (F5). Crea la base y deja 4, 5, 6 y 10 filas
+   en categorias, clientes, productos y ventas.
+4. Después ejecutá `m4_consultas_negocio.sql` y `m5_consultas_joins.sql`. Cada consulta tiene
+   abajo un comentario `-- esperado:` con el resultado que tiene que dar.
 
-### Decisiones de diseño
+Ojo con un detalle: `m5_consultas_joins.sql` agrega 2 clientes y 2 productos sin ventas, que
+necesitan las consultas de "sin ventas". No toca la tabla ventas, así que los totales del M4 no
+cambian. Si querés volver a los datos originales, ejecutá otra vez `ventas_tech_db.sql`.
 
-- Los montos (`precio`, `precio_unitario`) usan `DECIMAL(10,2)` y no `FLOAT`, para evitar errores de redondeo en valores monetarios.
-- `precio_unitario` se guarda en `ventas` para conservar el precio vigente al momento de la compra, aunque el precio del producto cambie después.
-- `email` tiene restricción `UNIQUE` para que no haya dos clientes con el mismo correo.
-- `stock` y `activo` tienen valores por defecto (`0` y `1`).
+## Power BI
 
-## Estructura del script
-
-El archivo `ventas_tech_db.sql` está dividido en cuatro secciones, delimitadas por comentarios:
-
-1. **DROP:** elimina las tablas si existen, en orden inverso a sus dependencias (`ventas`, `productos`, `clientes`, `categorias`).
-2. **CREATE:** crea las tablas en orden jerárquico, con sus claves primarias, foráneas y restricciones.
-3. **INSERT:** carga los datos iniciales, con las columnas indicadas de forma explícita.
-4. **VALIDACIÓN:** ejecuta un `SELECT *` por tabla para verificar la carga.
-
-Antes de la sección 1, el script crea la base `Ventas_Tech_DB` si todavía no existe y se posiciona en ella. Gracias al orden del `DROP` y al `IF EXISTS`, se puede ejecutar varias veces sin errores.
-
-## Datos de ejemplo
-
-| Tabla | Registros |
-|---|---|
-| `categorias` | 4 |
-| `clientes` | 5 |
-| `productos` | 6 |
-| `ventas` | 10 |
-| **Total** | **25** |
-
-## Cómo ejecutar el script en SSMS
-
-1. Abrí **SQL Server Management Studio** y conectate a tu instancia de SQL Server (local o remota).
-2. Descargá `modulo-3/ventas_tech_db.sql` de este repositorio.
-3. En SSMS, andá a **Archivo → Abrir → Archivo...** y seleccioná `ventas_tech_db.sql`.
-4. Verificá que la conexión activa sea tu servidor. No hace falta elegir una base: el script crea `Ventas_Tech_DB` y la selecciona con `USE`.
-5. Presioná **Ejecutar** (o la tecla **F5**).
-6. Revisá la pestaña **Resultados**: deberían aparecer cuatro tablas con 4, 5, 6 y 10 filas.
-
-Si querés volver a empezar desde cero, volvé a ejecutar el script completo: la sección DROP elimina las tablas y se recrean con los datos iniciales.
-
-## Autor
-
-Matías — Curso de Análisis de Datos, Coderhouse (Módulo 3).
+La parte de Power BI trabaja sobre el dataset del curso (`Pipeline_ETL_Dataset.xlsx`), que tiene
+las mismas 4 tablas con más registros. En Power Query limpié duplicados y nulos y armé
+`Dim_Clientes`, `Dim_Productos`, `Dim_Categorias` y `Fact_Ventas` (M6). En el M8 sumé las
+relaciones 1:N, la tabla calendario `Dim_Fechas` y una tabla `_Medidas` con 5 medidas DAX.

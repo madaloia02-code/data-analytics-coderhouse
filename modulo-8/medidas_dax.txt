@@ -1,0 +1,39 @@
+=== Dim_Fechas (Modelado > Nueva tabla) ===
+Dim_Fechas = CALENDAR(
+    MIN(Fact_Ventas[fecha_venta]),
+    MAX(Fact_Ventas[fecha_venta])
+)
+
+=== Columnas de Dim_Fechas (Herramientas de tabla > Nueva columna, una por vez) ===
+Año = YEAR(Dim_Fechas[Date])
+Mes Número = MONTH(Dim_Fechas[Date])
+Mes Nombre = FORMAT(Dim_Fechas[Date], "MMMM")
+Trimestre = "T" & QUARTER(Dim_Fechas[Date])
+Semana = WEEKNUM(Dim_Fechas[Date])
+
+=== Medidas (clic derecho en _Medidas > Nueva medida, una por vez) ===
+Total Ventas = SUM(Fact_Ventas[total_venta])
+
+Ventas Online = CALCULATE(
+    [Total Ventas],
+    Fact_Ventas[canal] = "Online"
+)
+
+Ventas YTD = TOTALYTD(
+    [Total Ventas],
+    Dim_Fechas[Date]
+)
+
+Ventas LY = CALCULATE(
+    [Total Ventas],
+    SAMEPERIODLASTYEAR(Dim_Fechas[Date])
+)
+
+% Crecimiento Anual =
+VAR VentasActual = [Total Ventas]
+VAR VentasAnterior = [Ventas LY]
+RETURN
+    DIVIDE(
+        VentasActual - VentasAnterior,
+        VentasAnterior
+    )
